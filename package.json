@@ -1,0 +1,42 @@
+{
+  "name": "moon-isle-photo-galaxy",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "星月粒子照片墙 · 可自部署的照片/视频画廊",
+  "license": "MIT",
+  "author": "Moon Isle contributors",
+  "keywords": ["photo-gallery", "threejs", "webgl", "self-hosted", "photo-wall", "sqlite", "express"],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n API,WEB -c cyan,magenta \"npm:dev:server\" \"npm:dev:web\"",
+    "dev:server": "node --watch server/index.js",
+    "dev:web": "vite",
+    "build": "vite build --configLoader native",
+    "start": "node server/index.js",
+    "create-admin": "node scripts/create-admin.js",
+    "seed:demo": "node scripts/seed-demo.js",
+    "test": "node tests/api.test.js",
+    "test:e2e": "node scripts/e2e.mjs"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^13.0.3",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^18.0.9",
+    "express": "^4.22.3",
+    "express-rate-limit": "^8.7.1",
+    "file-type": "^22.2.0",
+    "helmet": "^8.3.0",
+    "sharp": "^0.35.5",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6",
+    "playwright-core": "^1.64.1",
+    "supertest": "^7.3.1",
+    "vite": "^8.3.5"
+  }
+}

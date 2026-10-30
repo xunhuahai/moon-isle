@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#050711" />
+    <meta name="description" content="月屿 · 把照片放回星空的 3D 粒子照片墙" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>月屿 · 星月照片墙</title>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="scene" aria-label="3D 星月照片墙"></canvas>
+      <div class="scene-aura" aria-hidden="true"></div>
+      <div class="scene-grain" aria-hidden="true"></div>
+
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="月屿首页">
+          <span class="brand-mark" aria-hidden="true"><i></i></span>
+          <span class="brand-copy">
+            <strong>月屿</strong>
+            <small>MOON ISLE · 记忆星系</small>
+          </span>
+        </a>
+        <div class="topbar-actions">
+          <span class="memory-count" id="memoryCount"><b>0</b><span>颗记忆</span></span>
+          <button class="btn btn-ghost btn-upload" id="uploadButton" type="button" aria-label="上传" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg><span>上传</span>
+          </button>
+          <button class="account-pill" id="accountButton" type="button" aria-haspopup="menu" aria-expanded="false">
+            <span class="account-avatar" id="accountAvatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 20c.6-3.5 3.1-5.4 6.5-5.4s5.9 1.9 6.5 5.4"/></svg></span>
+            <span id="accountLabel">登录</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="user-menu" id="userMenu" role="menu" hidden>
+        <div class="user-menu-head">
+          <span class="user-menu-avatar" id="menuAvatar"></span>
+          <div><strong id="menuName"></strong><small id="menuRole"></small></div>
+        </div>
+        <button type="button" class="menu-item" id="wallMenuButton"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></svg><span>月亮内部</span></button>
+        <button type="button" class="menu-item" id="changePasswordButton"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8.5" cy="15.5" r="4.5"/><path d="m11.8 12.2 8.2-8.2"/><path d="M17 4.5 20.5 8"/><path d="m14.5 7 2 2"/></svg><span>修改密码</span></button>
+        <button type="button" class="menu-item" id="adminButton" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5.2c0 4.4 3 7.4 7 9.8 4-2.4 7-5.4 7-9.8V6l-7-3Z"/><path d="m9.2 12 2 2 3.8-4"/></svg><span>用户与权限</span></button>
+        <button type="button" class="menu-item danger" id="logoutButton"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 5V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1"/><path d="M9 12h11"/><path d="m17 8 4 4-4 4"/></svg><span>退出登录</span></button>
+      </div>
+
+      <div class="hint" id="hint">
+        <span class="hint-line"></span>
+        <span id="hintText">滚轮缩小到 10% 看整片星海 · 点击月亮登录</span>
+      </div>
+
+      <div class="zoom-dock" id="zoomDock" role="group" aria-label="整体缩放">
+        <button class="zoom-step" id="zoomOut" type="button" aria-label="缩小画面">−</button>
+        <button class="zoom-readout" id="zoomReset" type="button" title="点击恢复到 100%">
+          <b id="zoomPercent">100%</b>
+          <small id="zoomMode">月亮视角</small>
+        </button>
+        <button class="zoom-step" id="zoomIn" type="button" aria-label="放大画面">＋</button>
+      </div>
+
+      <div class="empty-state" id="emptyState" hidden>
+        <span class="eyebrow">THE FIRST LIGHT</span>
+        <h2>星海还没有记忆</h2>
+        <p id="emptyCopy">上传第一张照片，让月亮慢慢成形。</p>
+        <button class="btn btn-primary" id="emptyAction" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg><span>点亮第一颗星</span></button>
+      </div>
+
+      <div class="loading-screen" id="loadingScreen">
+        <div class="loader-system" aria-hidden="true">
+          <span class="loader-moon"></span>
+          <span class="loader-orbit orbit-a"><i></i></span>
+          <span class="loader-orbit orbit-b"><i></i></span>
+        </div>
+        <div class="loading-copy">
+          <span class="eyebrow">ASSEMBLING MEMORIES</span>
+          <h1>正在点亮星海</h1>
+          <p id="loadingText">收集散落的照片粒子…</p>
+        </div>
+      </div>
+
+      <div class="detail-scrim" id="detailScrim" aria-hidden="true"></div>
+      <div class="detail-photo-stage" id="detailPhotoStage" aria-hidden="true"></div>
+
+      <aside class="detail-panel" id="detailPanel" aria-hidden="true" aria-label="媒体详情">
+        <div class="detail-drag" aria-hidden="true"></div>
+        <div class="detail-scroll" id="detailScroll"></div>
+      </aside>
+
+      <section class="wall-view" id="wallView" aria-hidden="true">
+        <header class="wall-head">
+          <div class="wall-head-copy">
+            <span class="eyebrow" id="wallEyebrow">INNER MOON · PRIVATE WALL</span>
+            <h1 id="wallTitle">月亮内部</h1>
+            <p id="wallSubtitle">仅管理员与获授权成员可见</p>
+          </div>
+          <div class="wall-head-actions">
+            <button class="btn btn-ghost" id="wallUploadButton" type="button" aria-label="上传回忆" title="上传回忆"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg><span>放入月亮内部</span></button>
+            <button class="btn btn-subtle" id="wallBackButton" type="button" aria-label="返回月亮" title="返回月亮"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg><span>返回月亮</span></button>
+          </div>
+        </header>
+        <div class="wall-mosaic" id="wallMosaic" aria-hidden="true"></div>
+        <div class="wall-stage" id="wallStage">
+          <div class="wall-plane" id="wallPlane"></div>
+        </div>
+        <div class="wall-zoom" id="wallZoom" role="group" aria-label="照片墙缩放">
+          <button class="wall-zoom-step" id="wallZoomOut" type="button" aria-label="缩小照片墙">−</button>
+          <button class="wall-zoom-readout" id="wallZoomReset" type="button" title="恢复 100%">
+            <b id="wallZoomPercent">100%</b>
+            <small>照片墙缩放</small>
+          </button>
+          <button class="wall-zoom-step" id="wallZoomIn" type="button" aria-label="放大照片墙">＋</button>
+        </div>
+        <div class="wall-focus" id="wallFocus" aria-hidden="true">
+          <button class="wall-focus-backdrop" type="button" data-wall-close aria-label="关闭照片预览"></button>
+          <section class="wall-focus-panel" role="dialog" aria-modal="true" aria-label="照片预览">
+            <div class="wall-focus-media" id="wallFocusMedia"></div>
+            <div class="wall-focus-info">
+              <span class="eyebrow" id="wallFocusEyebrow">MEMORY IN FOCUS</span>
+              <h2 id="wallFocusTitle"></h2>
+              <p class="wall-focus-meta" id="wallFocusMeta"></p>
+              <p class="wall-focus-note" id="wallFocusNote"></p>
+              <div class="wall-focus-actions">
+                <button class="btn btn-primary" id="wallFocusDetail" type="button">查看完整详情</button>
+                <button class="btn btn-ghost" type="button" data-wall-close>返回照片墙</button>
+              </div>
+            </div>
+            <button class="icon-button wall-focus-close" type="button" data-wall-close aria-label="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg></button>
+          </section>
+        </div>
+        <div class="wall-hint"><span class="hint-line"></span><span>拖动空白处倾斜画面 · 滚轮浏览 · 点击照片放大查看</span></div>
+      </section>
+
+      <div class="warp-overlay" id="warpOverlay" aria-hidden="true">
+        <div class="warp-tunnel"></div>
+        <div class="warp-streaks" id="warpStreaks"></div>
+        <div class="warp-core"></div>
+        <div class="warp-flash"></div>
+        <div class="warp-copy"><span class="eyebrow">ENTERING THE MOON</span><strong>穿越月心</strong></div>
+      </div>
+
+      <div class="modal-root" id="modalRoot"></div>
+      <div class="toast-root" id="toastRoot" aria-live="polite"></div>
+      <div class="shortcut" id="shortcut" hidden><kbd>Esc</kbd><span>返回星海</span></div>
+    </div>
+    <noscript>请启用 JavaScript 以进入月屿照片星系。</noscript>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

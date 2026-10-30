@@ -1,0 +1,30 @@
+[Unit]
+Description=Moon Isle photo galaxy
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=photos
+Group=photos
+WorkingDirectory=/opt/moon-isle
+EnvironmentFile=/opt/moon-isle/.env
+ExecStart=/usr/bin/node server/index.js
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=20
+KillSignal=SIGTERM
+UMask=0027
+LimitNOFILE=65536
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/opt/moon-isle/data
+# 如使用系统 ffmpeg，允许读取系统目录（默认只读，不需要额外配置）
+# MemoryMax=1800M
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
